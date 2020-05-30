@@ -1,0 +1,30 @@
+name: Build and push Docker image
+on:
+  push:
+    branches:
+      - master
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 2
+    - name: Prepare version helper variables
+      run: |
+        echo "::set-env name=NEW_VERSION::`cat package.json | python -c "import sys, json; print json.load(sys.stdin)['version']"`"
+        echo "::set-env name=PREVIOUS_VERSION::`git show $(git log -1 --pretty=%P | awk '{print $1}'):package.json | python -c "import sys, json; print json.load(sys.stdin)['version']"`"
+    - if: env.NEW_VERSION != env.PREVIOUS_VERSION
+      name: Check if version changed
+      run: |
+        echo "Package version has changed from $PREVIOUS_VERSION to $NEW_VERSION"
+    - if: env.NEW_VERSION != env.PREVIOUS_VERSION
+      name: Build and push Docker image
+      uses: docker/build-push-action@v1.1.0
+      with:
+        username: $GITHUB_ACTOR
+        password: ${{ secrets.GITHUB_TOKEN }}
+        registry: docker.pkg.github.com
+        repository: '${{ github.repository }}/${{ github.event.repository.name }}'
+        tags: ${{ env.NEW_VERSION }}
