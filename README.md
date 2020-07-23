@@ -157,6 +157,15 @@ export CORSANYWHERE_RATELIMIT='50 3 my.example.com my2.example.com'
 node server.js
 ```
 
+### Docker
+
+To run CORS Anywhere via Docker, just run:
+
+```shell
+docker run -p 443:8080 -e "CORSANYWHERE_WHITELIST=https://domain.tld" docker.pkg.github.com/cloudaper/cors-anywhere/cors-anywhere:0.4.3
+```
+
+…and replace `domain.tld` with the domain you will send requests from (or add any other environment variables).
 
 ## License
 
